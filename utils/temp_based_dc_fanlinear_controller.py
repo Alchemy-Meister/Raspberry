@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import os
 import RPi.GPIO as gpio
 import time
 
@@ -12,10 +11,13 @@ FAN_MIN_TEMP = 45.0
 FAN_MAX_POWER = 100.0
 FAN_MIN_POWER = 30.0
 
+# Returns CPU temperature value as float
 def get_cpu_temperature():
-    res = os.popen('vcgencmd measure_temp').readline()
-    res = res.replace('temp=','').replace("'C\n",'')
-    return float(res)
+    with open('/sys/devices/virtual/thermal/thermal_zone0/temp', 'r') \
+        as file:
+        
+        str_temp = file.readline()
+        return float(str_temp) / 1000
 
 def calculate_linear_function_variables(y1, y2, x1, x2):
     b = (y2 - y1) / (-x1 + x2) 
@@ -32,8 +34,6 @@ def calculate_fan_power(a, b, current_cpu_temp):
 def main():
     a, b = calculate_linear_function_variables(FAN_MIN_POWER, FAN_MAX_POWER, \
         FAN_MIN_TEMP, FAN_MAX_TEMP)
-    increment = calculate_increment(FAN_MAX_POWER, FAN_MIN_POWER, \
-        FAN_MAX_TEMP, FAN_MIN_TEMP)
 
     gpio.setwarnings(False)
     gpio.setmode(gpio.BOARD)
