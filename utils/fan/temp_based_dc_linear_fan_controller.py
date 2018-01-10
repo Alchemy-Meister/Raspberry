@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
+import configparser
 import RPi.GPIO as gpio
 import time
-from fan import Profiles, Profile
+from profiles import Profiles, Profile_factory
 
 # Returns CPU temperature value as float
 def get_cpu_temperature():
@@ -11,6 +12,7 @@ def get_cpu_temperature():
         
         str_temp = file.readline()
         return float(str_temp) / 1000
+    return 60
 
 def calculate_linear_function_variables(y1, y2, x1, x2):
     b = (y2 - y1) / (-x1 + x2)
@@ -29,13 +31,15 @@ def main():
     config.read('config.ini')
     config = config['FAN_CONFIG']
 
-    fan_pin = config.getint('fan_pin', 12)
-    fan_frequency = config.getint('fan_frequency', 50)
-    update_interval = config.getint('update_interval', 15)
+    fan_pin = int(config.get('fan_pin', 12))
+    fan_frequency = int(config.get('fan_frequency', 50))
+    update_interval = int(config.get('update_interval', 15))
+    str_fan_profile = config.get('str_fan_profile', 'STANDARD')
     
-    fan_profile = ProfileFactory().create(Profiles.STANDARD)
-    a, b = calculate_linear_function_variables(fan_profile.min_duty, \
-        fan_profile.max_duty, fan_profile.min_temp, fan_profile.max_temp)
+    fan_profile = Profile_factory().create(Profiles[str_fan_profile])
+    if fan_profile.enabled:
+        a, b = calculate_linear_function_variables(fan_profile.min_duty, \
+            fan_profile.max_duty, fan_profile.min_temp, fan_profile.max_temp)
 
     gpio.setwarnings(False)
     gpio.setmode(gpio.BOARD)
