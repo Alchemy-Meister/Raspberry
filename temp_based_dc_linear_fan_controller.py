@@ -56,5 +56,7 @@ def main():
         
         time.sleep(update_interval)
 
+    gpio.cleanup()
+
 if __name__ == '__main__':
     main()
