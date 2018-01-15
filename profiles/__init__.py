@@ -1,3 +1,3 @@
 #!/usr/bin/env python
 
-from .profile import Profile_factory, Profiles
+from .profiles import Profile_factory, Profiles

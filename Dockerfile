@@ -1,5 +1,8 @@
-FROM arm64v8/python:3.7.0a4-alpine3.7
+FROM arm32v7/python:3.6.4
 WORKDIR /usr/src/app
-COPY 
-COPY pigpio.py /usr/lib/python3.7/site-packages/pigpio.py
+COPY ./requirements.txt ./temp/requirements.txt
+RUN pip install -r ./temp/requirements.txt
+COPY gpio .
+COPY profiles .
+COPY temp_based_dc_linear_fan_controller.py .
 CMD [ "python", "./temp_based_dc_linear_fan_controller.py" ]
